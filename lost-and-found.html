@@ -6,17 +6,17 @@
   <title>Lost & Found Manager</title>
   <style>
     :root {
-      --bg: #0f172a;        /* slate-900 */
-      --panel: #111827;     /* gray-900 */
-      --muted: #94a3b8;     /* slate-400 */
-      --text: #e5e7eb;      /* gray-200 */
-      --accent: #22c55e;    /* green-500 */
-      --accent-2: #60a5fa;  /* blue-400 */
-      --danger: #ef4444;    /* red-500 */
-      --warning: #f59e0b;   /* amber-500 */
-      --border: #1f2937;    /* gray-800 */
-      --chip-lost: #334155; /* slate-700 */
-      --chip-found: #14532d;/* green-900 */
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --accent-2: #60a5fa;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: #1f2937;
+      --chip-lost: #334155;
+      --chip-found: #14532d;
     }
 
     * { box-sizing: border-box; }
@@ -51,7 +51,6 @@
     }
     .hero h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
 
-
     .toolbar {
       display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
     }
@@ -68,7 +67,6 @@
 
     .content { padding: 16px 24px 24px; }
 
-    /* Table */
     table { width: 100%; border-collapse: collapse; }
     thead th {
       text-align: left; font-weight: 600; font-size: 12px; letter-spacing: .4px;
@@ -88,7 +86,6 @@
     .iconbtn.edit { border-color: #24476b; color: white; }
     .iconbtn.delete { border-color: #5b2323; color: white; }
 
-    /* Form */
     .grid { display: grid; gap: 12px; }
     .grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
@@ -99,7 +96,6 @@
     .field textarea { min-height: 80px; resize: vertical; }
     .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
 
-    /* Drawer */
     .drawer {
       position: fixed; inset: 0; display: grid; place-items: end center; pointer-events: none;
     }
@@ -113,7 +109,6 @@
     .drawer.open .panel { transform: translateY(0); opacity: 1; }
     .drawer header { padding: 16px 20px; border-bottom: 1px solid var(--border); display:flex; justify-content: space-between; align-items:center; }
 
-    /* Toast */
     .toast {
       position: fixed; right: 20px; bottom: 20px; background: #0b1020; color: var(--text);
       border: 1px solid var(--border); padding: 12px 14px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
@@ -126,9 +121,8 @@
     @media (max-width: 700px) { .grid.cols-2 { grid-template-columns: 1fr; } }
 
     #apiHint {
-  display: none;
-}
-
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -172,8 +166,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Drawer: Create / Edit -->
   <div class="drawer" id="drawer" aria-hidden="true">
     <div class="overlay" id="overlay"></div>
     <div class="panel">
@@ -214,18 +206,12 @@
       </div>
     </div>
   </div>
-
   <div class="toast" id="toast"><span id="toastIcon">•</span> <span id="toastMsg">Ready.</span></div>
-
   <script>
-    // === CONFIG ===
-    const API_URL = './lost-and-found.php'; // Adjust if your PHP file has a different path
+    const API_URL = './lost-and-found.php';
     document.getElementById('apiUrlLabel').textContent = API_URL;
-
-    // === Helpers ===
     const qs = (sel, el=document) => el.querySelector(sel);
     const qsa = (sel, el=document) => Array.from(el.querySelectorAll(sel));
-
     const toast = (msg, type='ok') => {
       const el = qs('#toast');
       const icon = qs('#toastIcon');
@@ -237,30 +223,22 @@
       clearTimeout(el._t);
       el._t = setTimeout(()=> el.classList.remove('show'), 2400);
     };
-
     const fmtDate = (s) => {
       if (!s) return '—';
       const d = new Date(s.replace(' ', 'T'));
       if (isNaN(d)) return s;
       return d.toLocaleString();
     };
-
     function chip(status) {
       const cls = status === 'found' ? 'found' : 'lost';
       return `<span class="chip ${cls}">${status}</span>`;
     }
-
-    // Drawer controls
     const drawer = qs('#drawer');
     const openDrawer = () => { drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); };
     const closeDrawer = () => { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
     qs('#overlay').addEventListener('click', closeDrawer);
     qs('#closeDrawer').addEventListener('click', closeDrawer);
-
-    // State
     let items = [];
-
-    // Fetch items
     async function loadItems() {
       try {
         qs('#tableBody').innerHTML = `<tr><td colspan="7" class="muted">Loading…</td></tr>`;
@@ -275,7 +253,6 @@
         toast(e.message, 'err');
       }
     }
-
     function renderTable() {
       const term = qs('#search').value.trim().toLowerCase();
       const status = qs('#statusFilter').value;
@@ -284,13 +261,11 @@
         const matchStatus = !status || (it.status === status);
         return matchTerm && matchStatus;
       });
-
       const tbody = qs('#tableBody');
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="muted">No items found.</td></tr>`;
         return;
       }
-
       tbody.innerHTML = filtered.map(it => `
         <tr>
           <td>#${it.id}</td>
@@ -306,12 +281,9 @@
         </tr>
       `).join('');
     }
-
     function escapeHtml(str) {
       return (str+"").replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[c]));
     }
-
-    // Table actions (edit/delete)
     qs('#itemsTable').addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -319,9 +291,7 @@
       const act = btn.dataset.act;
       const item = items.find(x => x.id === id);
       if (!item) return;
-
       if (act === 'edit') {
-        // Fill form and open drawer
         qs('#drawerTitle').textContent = 'Edit Item';
         qs('#itemId').value = item.id;
         qs('#item_name').value = item.item_name || '';
@@ -330,7 +300,6 @@
         qs('#reported_by').value = item.reported_by || '';
         openDrawer();
       }
-
       if (act === 'delete') {
         if (!confirm(`Delete item #${id}? This cannot be undone.`)) return;
         try {
@@ -348,8 +317,6 @@
         }
       }
     });
-
-    // Toolbar
     qs('#refreshBtn').addEventListener('click', loadItems);
     qs('#addBtn').addEventListener('click', () => {
       qs('#drawerTitle').textContent = 'Add Item';
@@ -359,8 +326,6 @@
     });
     qs('#search').addEventListener('input', renderTable);
     qs('#statusFilter').addEventListener('change', renderTable);
-
-    // Form submit
     qs('#itemForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {
@@ -369,15 +334,12 @@
         status: qs('#status').value,
         reported_by: qs('#reported_by').value.trim()
       };
-
       const id = Number(qs('#itemId').value || 0);
       const isEdit = !!id;
-
       if (!payload.item_name || !payload.status) {
         toast('Please fill required fields', 'warn');
         return;
       }
-
       try {
         const res = await fetch(API_URL, {
           method: isEdit ? 'PUT' : 'POST',
@@ -393,10 +355,7 @@
         toast(err.message, 'err');
       }
     });
-
     qs('#resetForm').addEventListener('click', () => qs('#itemForm').reset());
-
-    // Init
     loadItems();
   </script>
 </body>
